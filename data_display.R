@@ -16,37 +16,50 @@ if (interactive()) {
                                   "text/comma-separated-values,text/plain",
                                   ".csv"),
                                 
-                      ),
-                      tags$hr(),
-                      checkboxInput("header", "Header", TRUE)
+                      )
                     ),
                     mainPanel(
-                      column(8,actionButton("prevbutton","<")),
+                      #action buttons
+                      column(8,actionButton("prev","<")),
                       actionButton("endbutton","END"),
-                      column(2,actionButton("nextbutton",">")),
-                      tableOutput("contents")
+                      column(2,actionButton("next",">")),
+                      column(8, align="center",uiOutput('result')
+                      )
                     )
                   ),
+                  #selector for certain round
                   selectInput("round", "Choose a round:",
                               list('#round'=seq(1,100))
-                  ),
-                  textOutput("result")
+                  )
   )
   
   server <- function(input, output) {
-    output$contents <- renderTable({
-      # input$file1 will be NULL initially. After the user selects
-      # and uploads a file, it will be a data frame with 'name',
-      # 'size', 'type', and 'datapath' columns. The 'datapath'
-      # column will contain the local filenames where the data can
-      # be found.
+    output$result <- renderUI({
+      #display csv file
       inFile <- input$file1
       
       if (is.null(inFile))
         return(NULL)
       
-      read.csv(inFile$datapath, header = input$header)
-    })
+      numround = input$round
+      
+      #observeEvent(input$prev, {
+      #  numround=character(as.integer(numround)-1)}, once = TRUE)
+      
+      #output for selector #round
+      impordata <- read.csv(inFile$datapath, header = TRUE)
+      impordata <- subset(impordata,round_index==numround)
+      
+      #result display
+      data.display <- paste(br(),br(),"Round: ",numround,br(),
+                            "Player1: ",impordata$player1_move,
+                            "Player2: ",impordata$player2_move,br(),
+                            "Winner: ",br(),
+                            "Player1_points: ",impordata$player1_points,
+                            "Player2_points: ",impordata$player2_points,sep = '\n')
+      HTML(data.display)
+      
+    })#end of output$result
   }
   
   shinyApp(ui, server)
