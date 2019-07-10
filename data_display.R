@@ -1,11 +1,12 @@
 #load packages
 library(shiny)
-library(shinydashboard)
-library(DT)
+#library(shinydashboard)
+#library(shinyjs)
+#library(DT)
 
 #shiny part for diplaying data
 if (interactive()) {
-  
+  num_round <- seq(1, 100, by = 1)
   ui <- fluidPage(titlePanel("RPS_data"),
                   sidebarLayout(
                     sidebarPanel(
@@ -20,9 +21,9 @@ if (interactive()) {
                     ),
                     mainPanel(
                       #action buttons
-                      column(8,actionButton("prev","<")),
-                      actionButton("endbutton","END"),
-                      column(2,actionButton("next",">")),
+                      column(8,actionButton("prevbutton","<")),
+                      actionButton("end","END"),
+                      column(2,actionButton("nextbutton",">")),
                       column(8, align="center",uiOutput('result')
                       )
                     )
@@ -33,7 +34,7 @@ if (interactive()) {
                   )
   )
   
-  server <- function(input, output) {
+  server <- function(input, output,session) {
     output$result <- renderUI({
       #display csv file
       inFile <- input$file1
@@ -42,24 +43,50 @@ if (interactive()) {
         return(NULL)
       
       numround = input$round
-      
-      #observeEvent(input$prev, {
-      #  numround=character(as.integer(numround)-1)}, once = TRUE)
-      
+    
       #output for selector #round
-      impordata <- read.csv(inFile$datapath, header = TRUE)
-      impordata <- subset(impordata,round_index==numround)
+      data <- read.csv(inFile$datapath, header = TRUE)
+      sub.data <- subset(data,round_index==numround)
+      total.row <- nrow(data)
+      num_round <- seq(1, total.row, by = 1)
       
       #result display
-      data.display <- paste(br(),br(),"Round: ",numround,br(),
-                            "Player1: ",impordata$player1_move,
-                            "Player2: ",impordata$player2_move,br(),
+      whitespace <- paste(HTML('&nbsp;'),HTML('&nbsp;'),HTML('&nbsp;'),HTML('&nbsp;'))
+      data.display <- paste(br(),br(),"<b>","Round: ",numround,br(),
+                            "Player1: ",sub.data$player1_move,whitespace,
+                            "Player2: ",sub.data$player2_move,br(),
                             "Winner: ",br(),
-                            "Player1_points: ",impordata$player1_points,
-                            "Player2_points: ",impordata$player2_points,sep = '\n')
+                            "Player1_points: ",sub.data$player1_points,whitespace,
+                            "Player2_points: ",sub.data$player2_points,sep = '\n')
+
       HTML(data.display)
       
+      
     })#end of output$result
+    
+    #set action buttons
+    observeEvent(input$prevbutton, {
+      current <- which(num_round == input$round)
+      if(current > 1){
+        updateSelectInput(session, "round",
+                          choices = as.list(num_round),
+                          selected = num_round[current - 1])
+      }
+    })#end of previous button 
+    observeEvent(input$nextbutton, {
+      current <- which(num_round == input$round)
+      if(current < length(num_round)){
+        updateSelectInput(session, "round",
+                          choices = as.list(num_round),
+                          selected = num_round[current + 1])
+      }
+    })#end of next button
+    observeEvent(input$end, {
+        updateSelectInput(session, "round",
+                          choices = as.list(num_round),
+                          selected = num_round[100])
+    })#end of ending button
+    
   }
   
   shinyApp(ui, server)
