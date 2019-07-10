@@ -70,7 +70,7 @@ if (interactive()) {
       
       #result display
       whitespace <- paste(HTML('&nbsp;'),HTML('&nbsp;'),HTML('&nbsp;'),HTML('&nbsp;'))
-      data.display <- paste(br(),br(),"<b>","Round: ",numround,br(),
+      data.display <- paste(br(),br(),"<b>","Round: ",numround,"/",nrow(data()),br(),
                             "Player1: ",sub.data$player1_move,whitespace,
                             "Player2: ",sub.data$player2_move,br(),
                             "Winner: ",winner,br(),
