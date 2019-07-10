@@ -57,12 +57,23 @@ if (interactive()) {
       #output for certain round
       sub.data <- subset(data(),round_index==numround)
       
+      #Winner
+      if(sub.data$player1_outcome=="win"){
+        winner <- "Player1"
+      }
+      else if(sub.data$player1_outcome=="tie"){
+        winner <- "TIE"
+      }
+      else {
+        winner <- "Player2"
+      }
+      
       #result display
       whitespace <- paste(HTML('&nbsp;'),HTML('&nbsp;'),HTML('&nbsp;'),HTML('&nbsp;'))
       data.display <- paste(br(),br(),"<b>","Round: ",numround,br(),
                             "Player1: ",sub.data$player1_move,whitespace,
                             "Player2: ",sub.data$player2_move,br(),
-                            "Winner: ",br(),
+                            "Winner: ",winner,br(),
                             "Player1_points: ",sub.data$player1_points,whitespace,
                             "Player2_points: ",sub.data$player2_points,sep = '\n')
 
