@@ -1,5 +1,6 @@
 #load packages
 library(shiny)
+library(scales)
 #library(shinydashboard)
 #library(shinyjs)
 #library(DT)
@@ -68,6 +69,14 @@ if (interactive()) {
         winner <- "Player2"
       }
       
+      #Summary percentage
+      player1_win <- length(which(data()[1:numround,]$player1_outcome=="win"))
+      player2_win <- length(which(data()[1:numround,]$player2_outcome=="win"))
+      player_tie <- length(which(data()[1:numround,]$player1_outcome=="tie"))
+      player1_wpct <- percent(player1_win/as.double(numround))
+      player2_wpct <- percent(player2_win/as.double(numround))
+      tie_pct <- percent(player_tie/as.double(numround))
+      
       #result display (text part)
       whitespace2 <- paste(HTML('&nbsp;'),HTML('&nbsp;'))
       whitespace3 <- paste(HTML('&nbsp;'),HTML('&nbsp;'),HTML('&nbsp;'))
@@ -78,7 +87,11 @@ if (interactive()) {
                             "Player1_points: ",sub.data$player1_points,whitespace3,
                             "Player2_points: ",sub.data$player2_points,br(),
                             "Player1_Total points: ",sub.data$player1_total,whitespace2,
-                            "Player2_Total points: ",sub.data$player2_total)
+                            "Player2_Total points: ",sub.data$player2_total,br(),
+                            "Player1 Win: ",player1_wpct,whitespace2,
+                            "Player2 Win: ",player2_wpct,whitespace2,
+                            "Ties: ",tie_pct)
+      
 
       HTML(data.display)
       
