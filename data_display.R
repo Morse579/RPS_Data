@@ -41,7 +41,11 @@ if (interactive()) {
       inFile <- input$file1
       if (is.null(inFile))
         return(NULL)
-      read.csv(inFile$datapath, header = TRUE)
+      data <- read.csv(inFile$datapath, header = TRUE)
+      updateSelectInput(session, "round",
+                        choices = as.list(seq(1, nrow(data), by = 1)),
+                        selected = 1)
+      data
     })
     
     
@@ -50,11 +54,8 @@ if (interactive()) {
       if(is.null(data())){return ()}
       numround = input$round
     
-      #output for selector #round
-      #data <- read.csv(inFile$datapath, header = TRUE)
+      #output for certain round
       sub.data <- subset(data(),round_index==numround)
-      #total.row <- nrow(data())
-      #num_round <- seq(1, total.row, by = 1)
       
       #result display
       whitespace <- paste(HTML('&nbsp;'),HTML('&nbsp;'),HTML('&nbsp;'),HTML('&nbsp;'))
@@ -81,6 +82,7 @@ if (interactive()) {
                           selected = num_round[current - 1])
       }
     })#end of previous button 
+    
     observeEvent(input$nextbutton, {
       total.row <- nrow(data())
       num_round <- seq(1, total.row, by = 1)
@@ -91,6 +93,7 @@ if (interactive()) {
                           selected = num_round[current + 1])
       }
     })#end of next button
+    
     observeEvent(input$end, {
       total.row <- nrow(data())
       num_round <- seq(1, total.row, by = 1)
