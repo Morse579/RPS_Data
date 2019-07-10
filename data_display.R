@@ -6,7 +6,7 @@ library(shiny)
 
 #shiny part for diplaying data
 if (interactive()) {
-  num_round <- seq(1, 100, by = 1)
+
   ui <- fluidPage(titlePanel("RPS_data"),
                   sidebarLayout(
                     sidebarPanel(
@@ -35,20 +35,26 @@ if (interactive()) {
   )
   
   server <- function(input, output,session) {
-    output$result <- renderUI({
+    #num_round <- seq(1, 100, by = 1)
+    data <- reactive({
       #display csv file
       inFile <- input$file1
-      
       if (is.null(inFile))
         return(NULL)
-      
+      read.csv(inFile$datapath, header = TRUE)
+    })
+    
+    
+    output$result <- renderUI({
+      #display csv file
+      if(is.null(data())){return ()}
       numround = input$round
     
       #output for selector #round
-      data <- read.csv(inFile$datapath, header = TRUE)
-      sub.data <- subset(data,round_index==numround)
-      total.row <- nrow(data)
-      num_round <- seq(1, total.row, by = 1)
+      #data <- read.csv(inFile$datapath, header = TRUE)
+      sub.data <- subset(data(),round_index==numround)
+      #total.row <- nrow(data())
+      #num_round <- seq(1, total.row, by = 1)
       
       #result display
       whitespace <- paste(HTML('&nbsp;'),HTML('&nbsp;'),HTML('&nbsp;'),HTML('&nbsp;'))
@@ -66,6 +72,8 @@ if (interactive()) {
     
     #set action buttons
     observeEvent(input$prevbutton, {
+      total.row <- nrow(data())
+      num_round <- seq(1, total.row, by = 1)
       current <- which(num_round == input$round)
       if(current > 1){
         updateSelectInput(session, "round",
@@ -74,6 +82,8 @@ if (interactive()) {
       }
     })#end of previous button 
     observeEvent(input$nextbutton, {
+      total.row <- nrow(data())
+      num_round <- seq(1, total.row, by = 1)
       current <- which(num_round == input$round)
       if(current < length(num_round)){
         updateSelectInput(session, "round",
@@ -82,9 +92,11 @@ if (interactive()) {
       }
     })#end of next button
     observeEvent(input$end, {
-        updateSelectInput(session, "round",
+      total.row <- nrow(data())
+      num_round <- seq(1, total.row, by = 1)
+      updateSelectInput(session, "round",
                           choices = as.list(num_round),
-                          selected = num_round[100])
+                          selected = num_round[total.row])
     })#end of ending button
     
   }
