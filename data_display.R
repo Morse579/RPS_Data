@@ -35,7 +35,7 @@ if (interactive()) {
   )
   
   server <- function(input, output,session) {
-    #num_round <- seq(1, 100, by = 1)
+    
     data <- reactive({
       #display csv file
       inFile <- input$file1
@@ -68,14 +68,17 @@ if (interactive()) {
         winner <- "Player2"
       }
       
-      #result display
-      whitespace <- paste(HTML('&nbsp;'),HTML('&nbsp;'),HTML('&nbsp;'),HTML('&nbsp;'))
+      #result display (text part)
+      whitespace2 <- paste(HTML('&nbsp;'),HTML('&nbsp;'))
+      whitespace3 <- paste(HTML('&nbsp;'),HTML('&nbsp;'),HTML('&nbsp;'))
       data.display <- paste(br(),br(),"<b>","Round: ",numround,"/",nrow(data()),br(),
-                            "Player1: ",sub.data$player1_move,whitespace,
+                            "Player1: ",sub.data$player1_move,whitespace3,
                             "Player2: ",sub.data$player2_move,br(),
                             "Winner: ",winner,br(),
-                            "Player1_points: ",sub.data$player1_points,whitespace,
-                            "Player2_points: ",sub.data$player2_points,sep = '\n')
+                            "Player1_points: ",sub.data$player1_points,whitespace3,
+                            "Player2_points: ",sub.data$player2_points,br(),
+                            "Player1_Total points: ",sub.data$player1_total,whitespace2,
+                            "Player2_Total points: ",sub.data$player2_total)
 
       HTML(data.display)
       
