@@ -88,12 +88,10 @@ if (interactive()) {
                             "Player2_points: ",sub.data$player2_points,br(),
                             "Player1_Total points: ",sub.data$player1_total,whitespace2,
                             "Player2_Total points: ",sub.data$player2_total,br(),
-                            "Player1 Wins: ",player1_wpct,whitespace2,
-                            "Losses: ",player2_wpct,whitespace2,
-                            "Ties: ",tie_pct,br(),
-                            "Player2 Wins: ",player2_wpct,whitespace2,
-                            "Losses: ",player1_wpct,whitespace2,
-                            "Ties: ",tie_pct)
+                            "Player1",whitespace3,"Player2",br(),
+                            "Wins: ",player1_wpct,whitespace3,"Wins: ",player2_wpct,br(),
+                            "Losses: ",player2_wpct,whitespace3,"Losses: ",player1_wpct,br(),
+                            "Ties: ",tie_pct,whitespace3,"Ties: ",tie_pct)
       
 
       HTML(data.display)
