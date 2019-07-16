@@ -1,6 +1,8 @@
 #load packages
 library(shiny)
 library(scales)
+library(plotrix)
+library(tidyverse) 
 #library(shinydashboard)
 #library(shinyjs)
 #library(DT)
@@ -21,12 +23,17 @@ if (interactive()) {
                       )
                     ),
                     mainPanel(
-                      #action buttons
-                      column(8,actionButton("prevbutton","<")),
-                      actionButton("end","END"),
-                      column(2,actionButton("nextbutton",">")),
-                      column(8, align="center",uiOutput('result')
+                      #tabset for plot, summary and table
+                      tabsetPanel(
+                        tabPanel("Replay",column(8,actionButton("prevbutton","<")),
+                                 actionButton("start","START"),
+                                 actionButton("end","END"),
+                                 column(2,actionButton("nextbutton",">")),
+                                 column(8, align="center",uiOutput('result'))), 
+                        tabPanel("Summary", plotOutput("plot")) 
                       )
+                      
+                      #action buttons
                     )
                   ),
                   #selector for certain round
@@ -37,6 +44,7 @@ if (interactive()) {
   
   server <- function(input, output,session) {
     
+    #function for uploading the file
     data <- reactive({
       #display csv file
       inFile <- input$file1
@@ -49,7 +57,7 @@ if (interactive()) {
       data
     })
     
-    
+    #replay tabpanel display
     output$result <- renderUI({
       #display csv file
       if(is.null(data())){return ()}
@@ -69,29 +77,32 @@ if (interactive()) {
         winner <- "Player2"
       }
       
-      #Summary percentage
+      #Summary percent
       player1_win <- length(which(data()[1:numround,]$player1_outcome=="win"))
       player2_win <- length(which(data()[1:numround,]$player2_outcome=="win"))
       player_tie <- length(which(data()[1:numround,]$player1_outcome=="tie"))
-      player1_wpct <- percent(player1_win/as.double(numround))
-      player2_wpct <- percent(player2_win/as.double(numround))
-      tie_pct <- percent(player_tie/as.double(numround))
+      #player1_wpct <- percent(player1_win/as.double(numround))
+      #player2_wpct <- percent(player2_win/as.double(numround))
+      #tie_pct <- percent(player_tie/as.double(numround))
       
       #result display (text part)
-      whitespace2 <- paste(HTML('&nbsp;'),HTML('&nbsp;'))
-      whitespace3 <- paste(HTML('&nbsp;'),HTML('&nbsp;'),HTML('&nbsp;'))
+      whitespace2 <- paste(HTML('&nbsp;'),HTML('&nbsp;'),HTML('&nbsp;'))
+      whitespace3 <- paste(HTML('&nbsp;'),HTML('&nbsp;'),HTML('&nbsp;'),
+                           HTML('&nbsp;'),HTML('&nbsp;'))
       data.display <- paste(br(),br(),"<b>","Round: ",numround,"/",nrow(data()),br(),
-                            "Player1: ",sub.data$player1_move,whitespace3,
-                            "Player2: ",sub.data$player2_move,br(),
                             "Winner: ",winner,br(),
-                            "Player1_points: ",sub.data$player1_points,whitespace3,
-                            "Player2_points: ",sub.data$player2_points,br(),
-                            "Player1_Total points: ",sub.data$player1_total,whitespace2,
-                            "Player2_Total points: ",sub.data$player2_total,br(),
                             "Player1",whitespace3,"Player2",br(),
-                            "Wins: ",player1_wpct,whitespace3,"Wins: ",player2_wpct,br(),
-                            "Losses: ",player2_wpct,whitespace3,"Losses: ",player1_wpct,br(),
-                            "Ties: ",tie_pct,whitespace3,"Ties: ",tie_pct)
+                            sub.data$player1_move,whitespace3,sub.data$player2_move,br(),
+                            round(as.numeric(sub.data$player1_rt)),whitespace3,
+                            round(as.numeric(sub.data$player2_rt)),br(),
+                            "Total points: ",sub.data$player1_total,whitespace2,
+                            "Total points: ",sub.data$player2_total,br(),
+                            "Wins: ",player1_win,"/",numround,whitespace3,
+                            "Wins: ",player2_win,"/",numround,br(),
+                            "Losses: ",player2_win,"/",numround,whitespace3,
+                            "Losses: ",player1_win,"/",numround,br(),
+                            "Ties: ",player_tie,"/",numround,whitespace3,
+                            "Ties: ",player_tie,"/",numround)
       
 
       HTML(data.display)
@@ -129,6 +140,19 @@ if (interactive()) {
                           choices = as.list(num_round),
                           selected = num_round[total.row])
     })#end of ending button
+    
+    observeEvent(input$start, {
+      total.row <- nrow(data())
+      num_round <- seq(1, total.row, by = 1)
+      updateSelectInput(session, "round",
+                        choices = as.list(num_round),
+                        selected = num_round[1])
+    })#end of starting button
+    
+    #plot display
+    output$plot <- renderPlot({
+
+    })
     
   }
   
