@@ -2,7 +2,8 @@
 library(shiny)
 library(scales)
 library(plotrix)
-library(tidyverse) 
+library(tidyverse)
+library(gridExtra)
 #library(shinydashboard)
 #library(shinyjs)
 #library(DT)
@@ -30,7 +31,12 @@ if (interactive()) {
                                  actionButton("end","END"),
                                  column(2,actionButton("nextbutton",">")),
                                  column(8, align="center",uiOutput('result'))), 
-                        tabPanel("Summary", plotOutput("plot")) 
+                        tabPanel("Summary", 
+                                 splitLayout(cellWidths = c("50%", "50%"), 
+                                             plotOutput("plot1"), plotOutput("plot2"),
+                                             plotOutput("plot3")
+                                             )
+                                 ) 
                       )
                       
                       #action buttons
@@ -150,9 +156,25 @@ if (interactive()) {
     })#end of starting button
     
     #plot display
-    output$plot <- renderPlot({
-
+    output$plot1 <- renderPlot({
+      bar1 <- ggplot(data = data(), aes(x = player1_move)) +
+        geom_bar(aes(y = (..count..)/sum(..count..)*100),fill = "lightskyblue3")+
+        labs(x = "Player1 Move",y = "Percent")
+      bar1.1 <- ggplot(data = data(), aes(x = player1_outcome)) +
+        geom_bar(aes(y = (..count..)/sum(..count..)*100),fill = "lightskyblue3")+
+        labs(x = "Player1 Outcome",y = "Percent")
+      grid.arrange(bar1,bar1.1, ncol=1)
     })
+    
+    output$plot2 <- renderPlot({
+      bar2 <- ggplot(data = data(), aes(x = player2_move)) +
+        geom_bar(aes(y = (..count..)/sum(..count..)*100))+
+        labs(x = "Player2 Move",y = "Percent")
+      bar2.1 <- ggplot(data = data(), aes(x = player2_outcome)) +
+        geom_bar(aes(y = (..count..)/sum(..count..)*100))+
+        labs(x = "Player1 Outcome",y = "Percent")
+      grid.arrange(bar2,bar2.1, ncol=1)
+    }) # end of bar chart plot
     
   }
   
