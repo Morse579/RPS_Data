@@ -34,7 +34,7 @@ if (interactive()) {
                         tabPanel("Summary", 
                                  splitLayout(cellWidths = c("50%", "50%"), 
                                              plotOutput("plot1"), plotOutput("plot2"),
-                                             plotOutput("plot3")
+                                             uiOutput('matrix')
                                              )
                                  ) 
                       )
@@ -163,7 +163,7 @@ if (interactive()) {
       bar1.1 <- ggplot(data = data(), aes(x = player1_outcome)) +
         geom_bar(aes(y = (..count..)/sum(..count..)*100),fill = "lightskyblue3")+
         labs(x = "Player1 Outcome",y = "Percent")
-      grid.arrange(bar1,bar1.1, ncol=1)
+      grid.arrange(bar1,bar1.1,ncol=1)
     })
     
     output$plot2 <- renderPlot({
@@ -172,9 +172,43 @@ if (interactive()) {
         labs(x = "Player2 Move",y = "Percent")
       bar2.1 <- ggplot(data = data(), aes(x = player2_outcome)) +
         geom_bar(aes(y = (..count..)/sum(..count..)*100))+
-        labs(x = "Player1 Outcome",y = "Percent")
+        labs(x = "Player2 Outcome",y = "Percent")
       grid.arrange(bar2,bar2.1, ncol=1)
     }) # end of bar chart plot
+    
+    output$matrix <- renderTable({
+      transition(data()$player1_move)
+    })
+    
+    #helper method
+    transition <- function(data){
+      t_matrix <- matrix(0, nrow = 4, ncol = 4)
+      names <- c("no_choice","rock","paper","scissors")
+      rownames(t_matrix) <- c('N/A','R','P','S')
+      colnames(t_matrix) <- c('N/A','R','P','S')
+      current <- which(names == data[1])
+      for (i in data[-1]){
+        if (i == "rock"){
+          t_matrix[current,2] <- t_matrix[current,2]+1
+          current <- 2
+        }
+        else if (i == "paper"){
+          t_matrix[current,3] <- t_matrix[current,3]+1
+          current <- 3
+        }
+        else if (i == "scissors"){
+          t_matrix[current,4] <- t_matrix[current,4]+1
+          current <- 4
+        }
+        else{
+          t_matrix[current,1] <- t_matrix[current,1]+1
+          current <- 1
+        } 
+      }
+      result <- t_matrix/rowSums(t_matrix)
+      result[is.nan(result)] <- 0  
+      result
+    }
     
   }
   
