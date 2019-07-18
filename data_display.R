@@ -33,8 +33,10 @@ if (interactive()) {
                                  column(8, align="center",uiOutput('result'))), 
                         tabPanel("Summary", 
                                  splitLayout(cellWidths = c("50%", "50%"), 
-                                             plotOutput("plot1"), plotOutput("plot2"),
-                                             uiOutput('matrix')
+                                             plotOutput("plot1"), plotOutput("plot2")
+                                             ),
+                                 splitLayout(cellWidths = c("50%", "50%"), 
+                                             uiOutput('matrix1'), uiOutput('matrix2')
                                              )
                                  ) 
                       )
@@ -176,8 +178,12 @@ if (interactive()) {
       grid.arrange(bar2,bar2.1, ncol=1)
     }) # end of bar chart plot
     
-    output$matrix <- renderTable({
+    output$matrix1 <- renderTable(rownames = TRUE,{
       transition(data()$player1_move)
+    })
+    
+    output$matrix2 <- renderTable(rownames = TRUE,{
+      transition(data()$player2_move)
     })
     
     #helper method
