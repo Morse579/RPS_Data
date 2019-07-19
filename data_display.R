@@ -31,18 +31,23 @@ if (interactive()) {
                                  actionButton("end","END"),
                                  column(2,actionButton("nextbutton",">")),
                                  column(8, align="center",uiOutput('result'))), 
-                        tabPanel("Summary", 
+                        tabPanel("Summary",
+                                 splitLayout(cellWidths = c("50%", "50%"), 
+                                             column(8, offset=3,align="center",uiOutput("title1")),
+                                             column(8, offset=3,align="center",uiOutput("title2"))
+                                 ),
                                  splitLayout(cellWidths = c("50%", "50%"), 
                                              plotOutput("plot1"), plotOutput("plot2")
                                              ),
                                  splitLayout(cellWidths = c("50%", "50%"), 
                                              uiOutput('matrix1'), uiOutput('matrix2')
-                                             )
-                                 ) 
-                      )
-                      
-                      #action buttons
-                    )
+                                             ),
+                                 splitLayout(cellWidths = c("50%", "50%"), 
+                                             uiOutput('matrix3'), uiOutput('matrix4')
+                                 )
+                                 )#end of Summary tabpanel 
+                      )#end of tabpanel
+                    )#end of main panel
                   ),
                   #selector for certain round
                   selectInput("round", "Choose a round:",
@@ -178,6 +183,7 @@ if (interactive()) {
       grid.arrange(bar2,bar2.1, ncol=1)
     }) # end of bar chart plot
     
+    #transition matrix output
     output$matrix1 <- renderTable(rownames = TRUE,{
       transition(data()$player1_move)
     })
@@ -186,7 +192,25 @@ if (interactive()) {
       transition(data()$player2_move)
     })
     
-    #helper method
+    output$matrix3 <- renderTable(rownames = TRUE,{
+      transition_o(data()$player1_outcome,data()$player1_move)
+    })
+    
+    output$matrix4 <- renderTable(rownames = TRUE,{
+      transition_o(data()$player2_outcome,data()$player2_move)
+    })#end of transition matrix output
+    
+    #title for summary tabpanel
+    output$title1 <- renderUI({
+      title <- paste(br(),"PLAYER1",br(),br())
+      HTML(title)
+      })
+    output$title2 <- renderText({      
+      title <- paste(br(),"PLAYER2",br(),br())
+    HTML(title)
+    })#end of title of summary part
+    
+    #helper method for calculating move transition matrix
     transition <- function(data){
       t_matrix <- matrix(0, nrow = 4, ncol = 4)
       names <- c("no_choice","rock","paper","scissors")
@@ -214,9 +238,57 @@ if (interactive()) {
       result <- t_matrix/rowSums(t_matrix)
       result[is.nan(result)] <- 0  
       result
-    }
+    }#end of helper method 1
     
-  }
+    #helper method for calculating outcome transition matrix
+    transition_o <- function(list_a,list_b){
+      t_matrix <- matrix(0, nrow = 3, ncol = 4)
+      colnames(t_matrix) <- c('same','forward','reverse','N/A')
+      rownames(t_matrix) <- c('win','loss','tie')
+      current <- -1
+      for (i in seq(1,length(list_a)-1)){
+        if (list_b[i]=="no_choice"){
+          next
+        }
+        if(list_a[i]=="win"){
+          current<-direction(list_b[i],list_b[i+1])
+          t_matrix[1,current] <- t_matrix[1,current]+1
+        }
+        else if (list_a[i]=="loss"){
+          current<-direction(list_b[i],list_b[i+1])
+          t_matrix[2,current] <- t_matrix[2,current]+1    
+        }
+        else{
+          current<-direction(list_b[i],list_b[i+1])
+          t_matrix[3,current] <- t_matrix[3,current]+1    
+        }
+      }
+      
+      result <- t_matrix/rowSums(t_matrix)
+      result[is.nan(result)] <- 0
+      result
+    }#end of helper method2
+    
+    #helper method for tracking direction
+    direction<-function(o1,o2){
+      dir <- c("rock","paper","scissors","rock")
+      if(o1==o2){
+        return <- 1
+      }
+      else if(o2=="no_choice"){
+        return <- 4
+      }
+      else{
+        if(dir[which(dir==o1)[1]+1]==o2){
+          return <- 2
+        }
+        else{
+          return <-3
+        }
+      }
+    } #end of helper method for tracking direction
+    
+  }#end of server
   
   shinyApp(ui, server)
 }
