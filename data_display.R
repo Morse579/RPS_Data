@@ -10,7 +10,7 @@ library(gridExtra)
 
 #shiny part for diplaying data
 if (interactive()) {
-
+  
   ui <- fluidPage(titlePanel("RPS_data"),
                   sidebarLayout(
                     sidebarPanel(
@@ -24,13 +24,17 @@ if (interactive()) {
                       )
                     ),
                     mainPanel(
-                      #tabset for plot, summary and table
+                      #tabset for replay and summary
                       tabsetPanel(
                         tabPanel("Replay",column(8,actionButton("prevbutton","<")),
                                  actionButton("start","START"),
                                  actionButton("end","END"),
                                  column(2,actionButton("nextbutton",">")),
-                                 column(8, align="center",uiOutput('result'))), 
+                                 uiOutput('result'),
+                                 splitLayout(cellWidths = c("30%", "35%","35%"),
+                                             uiOutput('text1'), uiOutput('text2'),uiOutput('text3')
+                                 )
+                        ), #end of replay tabpanel
                         tabPanel("Summary",
                                  splitLayout(cellWidths = c("50%", "50%"), 
                                              column(8, offset=3,align="center",uiOutput("title1")),
@@ -38,14 +42,14 @@ if (interactive()) {
                                  ),
                                  splitLayout(cellWidths = c("50%", "50%"), 
                                              plotOutput("plot1"), plotOutput("plot2")
-                                             ),
+                                 ),
                                  splitLayout(cellWidths = c("50%", "50%"), 
                                              uiOutput('matrix1'), uiOutput('matrix2')
-                                             ),
+                                 ),
                                  splitLayout(cellWidths = c("50%", "50%"), 
                                              uiOutput('matrix3'), uiOutput('matrix4')
                                  )
-                                 )#end of Summary tabpanel 
+                        )#end of Summary tabpanel 
                       )#end of tabpanel
                     )#end of main panel
                   ),
@@ -70,12 +74,12 @@ if (interactive()) {
       data
     })
     
-    #replay tabpanel display
+    #replay tabpanel: #round and winner 
     output$result <- renderUI({
-      #display csv file
+      #user input
       if(is.null(data())){return ()}
       numround = input$round
-    
+      
       #output for certain round
       sub.data <- subset(data(),round_index==numround)
       
@@ -90,38 +94,83 @@ if (interactive()) {
         winner <- "Player2"
       }
       
+      #result display (text part)
+      data.display <- paste(br(),br(),"<b>",
+                            "<center>","Round: ",numround,"/",nrow(data()),br(),
+                            "Winner: ",winner,br()
+      )
+      HTML(data.display)
+    })#end of output$result
+    
+    #replay tabpanel: rownames
+    output$text1 <- renderUI({
+      #user input
+      if(is.null(data())){return ()}
+      numround = input$round
+      row.display <- paste("<b>",br(),"<u>","Move","</u>",br(),
+                           "<u>","RT","</u>",br(),
+                           "<u>","Total pt","</u>",br(),
+                           "<u>","Wins","</u>",br(),
+                           "<u>","Losses","</u>",br(),
+                           "<u>","Ties","</u>")
+      HTML(row.display)
+    })
+    
+    #replay tabpanel: PLAYER1
+    output$text2 <- renderUI({
+      #user input
+      if(is.null(data())){return ()}
+      numround = input$round
+      
+      #output for certain round
+      sub.data <- subset(data(),round_index==numround)
+      
       #Summary percent
       player1_win <- length(which(data()[1:numround,]$player1_outcome=="win"))
       player2_win <- length(which(data()[1:numround,]$player2_outcome=="win"))
       player_tie <- length(which(data()[1:numround,]$player1_outcome=="tie"))
-      #player1_wpct <- percent(player1_win/as.double(numround))
-      #player2_wpct <- percent(player2_win/as.double(numround))
-      #tie_pct <- percent(player_tie/as.double(numround))
+      player1_wpct <- percent(player1_win/as.double(numround))
+      player2_wpct <- percent(player2_win/as.double(numround))
+      tie_pct <- percent(player_tie/as.double(numround))
       
       #result display (text part)
-      whitespace2 <- paste(HTML('&nbsp;'),HTML('&nbsp;'),HTML('&nbsp;'))
-      whitespace3 <- paste(HTML('&nbsp;'),HTML('&nbsp;'),HTML('&nbsp;'),
-                           HTML('&nbsp;'),HTML('&nbsp;'))
-      data.display <- paste(br(),br(),"<b>","Round: ",numround,"/",nrow(data()),br(),
-                            "Winner: ",winner,br(),
-                            "Player1",whitespace3,"Player2",br(),
-                            sub.data$player1_move,whitespace3,sub.data$player2_move,br(),
-                            round(as.numeric(sub.data$player1_rt)),whitespace3,
-                            round(as.numeric(sub.data$player2_rt)),br(),
-                            "Total points: ",sub.data$player1_total,whitespace2,
-                            "Total points: ",sub.data$player2_total,br(),
-                            "Wins: ",player1_win,"/",numround,whitespace3,
-                            "Wins: ",player2_win,"/",numround,br(),
-                            "Losses: ",player2_win,"/",numround,whitespace3,
-                            "Losses: ",player1_win,"/",numround,br(),
-                            "Ties: ",player_tie,"/",numround,whitespace3,
-                            "Ties: ",player_tie,"/",numround)
+      p1.display <- paste("<b>","Player1",br(),
+                          sub.data$player1_move,br(),
+                          round(as.numeric(sub.data$player1_rt)),br(),
+                          sub.data$player1_total,br(),
+                          player1_win,"/",numround,"(",player1_wpct,")",br(),
+                          player2_win,"/",numround,"(",player2_wpct,")",br(),
+                          player_tie,"/",numround,"(",tie_pct,")")
+      HTML(p1.display)
+    })
+    
+    #replay tabpanel: PLAYER2
+    output$text3 <- renderUI({
+      #user input
+      if(is.null(data())){return ()}
+      numround = input$round
       
-
-      HTML(data.display)
+      #output for certain round
+      sub.data <- subset(data(),round_index==numround)
       
+      #Summary percent
+      player1_win <- length(which(data()[1:numround,]$player1_outcome=="win"))
+      player2_win <- length(which(data()[1:numround,]$player2_outcome=="win"))
+      player_tie <- length(which(data()[1:numround,]$player1_outcome=="tie"))
+      player1_wpct <- percent(player1_win/as.double(numround))
+      player2_wpct <- percent(player2_win/as.double(numround))
+      tie_pct <- percent(player_tie/as.double(numround))
       
-    })#end of output$result
+      #result display (text part)
+      p2.display <- paste("<b>","Player2",br(),
+                          sub.data$player2_move,br(),
+                          round(as.numeric(sub.data$player2_rt)),br(),
+                          sub.data$player2_total,br(),
+                          player2_win,"/",numround,"(",player2_wpct,")",br(),
+                          player1_win,"/",numround,"(",player1_wpct,")",br(),
+                          player_tie,"/",numround,"(",tie_pct,")")
+      HTML(p2.display)
+    })
     
     #set action buttons
     observeEvent(input$prevbutton, {
@@ -150,8 +199,8 @@ if (interactive()) {
       total.row <- nrow(data())
       num_round <- seq(1, total.row, by = 1)
       updateSelectInput(session, "round",
-                          choices = as.list(num_round),
-                          selected = num_round[total.row])
+                        choices = as.list(num_round),
+                        selected = num_round[total.row])
     })#end of ending button
     
     observeEvent(input$start, {
@@ -164,50 +213,58 @@ if (interactive()) {
     
     #plot display
     output$plot1 <- renderPlot({
-      bar1 <- ggplot(data = data(), aes(x = player1_move)) +
+      bar1 <- ggplot(data = data(), aes(x = player1_outcome)) +
         geom_bar(aes(y = (..count..)/sum(..count..)*100),fill = "lightskyblue3")+
-        labs(x = "Player1 Move",y = "Percent")
-      bar1.1 <- ggplot(data = data(), aes(x = player1_outcome)) +
+        labs(x = "Player1 Outcome",y = "Percent")+
+        geom_hline(linetype="dashed",color="red",yintercept=33)
+      bar1.1 <- ggplot(data = data(), aes(x = player1_move)) +
         geom_bar(aes(y = (..count..)/sum(..count..)*100),fill = "lightskyblue3")+
-        labs(x = "Player1 Outcome",y = "Percent")
+        labs(x = "Player1 Move",y = "Percent")+
+        geom_hline(linetype="dashed",color="red",yintercept=33)
       grid.arrange(bar1,bar1.1,ncol=1)
     })
     
     output$plot2 <- renderPlot({
-      bar2 <- ggplot(data = data(), aes(x = player2_move)) +
+      bar2 <- ggplot(data = data(), aes(x = player2_outcome)) +
         geom_bar(aes(y = (..count..)/sum(..count..)*100))+
-        labs(x = "Player2 Move",y = "Percent")
-      bar2.1 <- ggplot(data = data(), aes(x = player2_outcome)) +
+        labs(x = "Player2 Outcome",y = "Percent")+
+        geom_hline(linetype="dashed",color="red",yintercept=33)
+      bar2.1 <- ggplot(data = data(), aes(x = player2_move)) +
         geom_bar(aes(y = (..count..)/sum(..count..)*100))+
-        labs(x = "Player2 Outcome",y = "Percent")
+        labs(x = "Player2 Move",y = "Percent")+
+        geom_hline(linetype="dashed",color="red",yintercept=33)
       grid.arrange(bar2,bar2.1, ncol=1)
     }) # end of bar chart plot
     
     #transition matrix output
     output$matrix1 <- renderTable(rownames = TRUE,{
-      transition(data()$player1_move)
+      if(nrow(data())<=1){}
+      else{transition(data()$player1_move)}
     })
     
     output$matrix2 <- renderTable(rownames = TRUE,{
-      transition(data()$player2_move)
+      if(nrow(data())<=1){}
+      else{transition(data()$player2_move)}
     })
     
     output$matrix3 <- renderTable(rownames = TRUE,{
-      transition_o(data()$player1_outcome,data()$player1_move)
+      if(nrow(data())<=1){}
+      else{transition_o(data()$player1_outcome,data()$player1_move)}
     })
     
     output$matrix4 <- renderTable(rownames = TRUE,{
-      transition_o(data()$player2_outcome,data()$player2_move)
+      if(nrow(data())<=1){}
+      else{transition_o(data()$player2_outcome,data()$player2_move)}
     })#end of transition matrix output
     
     #title for summary tabpanel
     output$title1 <- renderUI({
       title <- paste(br(),"PLAYER1",br(),br())
       HTML(title)
-      })
+    })
     output$title2 <- renderText({      
       title <- paste(br(),"PLAYER2",br(),br())
-    HTML(title)
+      HTML(title)
     })#end of title of summary part
     
     #helper method for calculating move transition matrix
