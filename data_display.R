@@ -346,7 +346,8 @@ if (interactive()) {
     } #end of helper method for tracking direction
     
   }#end of server
-  
+
+}  
   shinyApp(ui, server)
-}
+
 
