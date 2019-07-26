@@ -123,15 +123,15 @@ if (interactive()) {
       numround = input$round
       
       #output for certain round
-      sub.data <- subset(data(),round_index==numround)
+      sub.data <<- subset(data(),round_index==numround)
       
       #Summary percent
-      player1_win <- length(which(data()[1:numround,]$player1_outcome=="win"))
-      player2_win <- length(which(data()[1:numround,]$player2_outcome=="win"))
-      player_tie <- length(which(data()[1:numround,]$player1_outcome=="tie"))
-      player1_wpct <- percent(player1_win/as.double(numround))
-      player2_wpct <- percent(player2_win/as.double(numround))
-      tie_pct <- percent(player_tie/as.double(numround))
+      player1_win <<- length(which(data()[1:numround,]$player1_outcome=="win"))
+      player2_win <<- length(which(data()[1:numround,]$player2_outcome=="win"))
+      player_tie <<- length(which(data()[1:numround,]$player1_outcome=="tie"))
+      player1_wpct <<- percent(player1_win/as.double(numround))
+      player2_wpct <<- percent(player2_win/as.double(numround))
+      tie_pct <<- percent(player_tie/as.double(numround))
       
       #result display (text part)
       p1.display <- paste("<b>","Player1",br(),
@@ -152,14 +152,6 @@ if (interactive()) {
       
       #output for certain round
       sub.data <- subset(data(),round_index==numround)
-      
-      #Summary percent
-      player1_win <- length(which(data()[1:numround,]$player1_outcome=="win"))
-      player2_win <- length(which(data()[1:numround,]$player2_outcome=="win"))
-      player_tie <- length(which(data()[1:numround,]$player1_outcome=="tie"))
-      player1_wpct <- percent(player1_win/as.double(numround))
-      player2_wpct <- percent(player2_win/as.double(numround))
-      tie_pct <- percent(player_tie/as.double(numround))
       
       #result display (text part)
       p2.display <- paste("<b>","Player2",br(),
