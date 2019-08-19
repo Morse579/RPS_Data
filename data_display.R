@@ -262,7 +262,7 @@ if (interactive()) {
     #helper method for calculating move transition matrix
     transition <- function(data){
       t_matrix <- matrix(0, nrow = 4, ncol = 4)
-      names <- c("no_choice","rock","paper","scissors")
+      names <- c("none","rock","paper","scissors")
       rownames(t_matrix) <- c('N/A','R','P','S')
       colnames(t_matrix) <- c('N/A','R','P','S')
       current <- which(names == data[1])
@@ -296,7 +296,7 @@ if (interactive()) {
       rownames(t_matrix) <- c('win','loss','tie')
       current <- -1
       for (i in seq(1,length(list_a)-1)){
-        if (list_b[i]=="no_choice"){
+        if (list_b[i]=="none"){
           next
         }
         if(list_a[i]=="win"){
@@ -324,7 +324,7 @@ if (interactive()) {
       if(o1==o2){
         return <- 1
       }
-      else if(o2=="no_choice"){
+      else if(o2=="none"){
         return <- 4
       }
       else{

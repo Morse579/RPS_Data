@@ -19,8 +19,8 @@ CSV_HEADERS = ["game_id", "round_index", "player1_id", "player2_id", \
             "player1_total", "player2_total"]
 
 GAME_ROUNDS = 100 # number of simulated rounds per game
-MAX_RT = 10000 # ms response time after which a "no_choice" outcome is selected
-VALID_MOVES = ["rock", "paper", "scissors", "no_choice"] # valid moves in a round on which outcomes are based
+MAX_RT = 10000 # ms response time after which a "none" outcome is selected
+VALID_MOVES = ["rock", "paper", "scissors", "none"] # valid moves in a round on which outcomes are based
 VALID_OUTCOMES = ["win", "tie", "loss"] # valid outcomes of a round on which points are based
 POINTS_LOOKUP = { # points allocation for each possible game outcome
     "win": 3,
@@ -59,7 +59,7 @@ class RpsPlayer(object):
 
     """
     Simulate a move for this player:
-    currently just a random draw from rock, paper, scissors, no_choice
+    currently just a random draw from rock, paper, scissors, none
     """
     def get_move(self):
         return random.sample(VALID_MOVES, 1)[0]
@@ -77,7 +77,7 @@ class RpsPlayer(object):
     """
     def get_player_move(self):
         move = self.get_move()
-        if move == "no_choice": # if simulated move is no_choice, player waited too long so rt is fixed
+        if move == "none": # if simulated move is none, player waited too long so rt is fixed
             rt = MAX_RT
         else:
             rt = self.get_rt()
@@ -121,7 +121,7 @@ class RpsRound(object):
             elif (self.player1_move == "rock" and self.player2_move == "scissors") or \
                 (self.player1_move == "paper" and self.player2_move == "rock") or \
                     (self.player1_move == "scissors" and self.player2_move == "paper") or \
-                        (self.player2_move == "no_choice"):
+                        (self.player2_move == "none"):
                 self.player1_outcome = "win"
                 self.player2_outcome = "loss"
             # all other: player2 wins
